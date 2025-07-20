@@ -5,5 +5,6 @@
   "scripts": {
     "lint": "eslint .",
     "test": "pytest -W error ../tests"
-  }
+  },
+  "type": "module"
 }
