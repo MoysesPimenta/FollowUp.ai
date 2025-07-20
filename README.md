@@ -37,6 +37,17 @@ pnpm test
 
 These commands delegate to each package's `lint` and `test` scripts.
 
+## Building Documentation
+
+Build the HTML documentation locally with Sphinx:
+
+```bash
+cd docs
+make -C source html
+```
+
+The generated site can be found in `docs/source/_build/html`.
+
 ## Contributing
 
 Refer to [`docs/backlog.md`](./docs/backlog.md) for planned work. Please mention the backlog item you are addressing when opening a pull request.
