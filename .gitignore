@@ -13,3 +13,4 @@ __pycache__/
 # Others
 .DS_Store
 .venv
+docs/build/
