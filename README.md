@@ -26,6 +26,14 @@ The repository is organised as a pnpm workspace. Packages are located in the fol
 - `infra` – infrastructure automation.
 - `scripts` – development utilities.
 
+## Running with Docker Compose
+
+Start the backend and frontend containers using:
+
+```bash
+docker compose up
+```
+
 ## Linting and Testing
 
 When linting and test suites are available, run them across the workspace with:

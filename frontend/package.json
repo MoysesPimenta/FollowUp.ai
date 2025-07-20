@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "lint": "echo 'no lint'",
-    "test": "echo 'no tests'"
+    "test": "echo 'no tests'",
+    "start": "node -e \"console.log(\\\"frontend service running\\\")\""
   }
 }
