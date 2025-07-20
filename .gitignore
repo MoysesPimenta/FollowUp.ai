@@ -1,0 +1,14 @@
+# Node
+node_modules/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environments
+.env
+
+# Others
+.DS_Store
