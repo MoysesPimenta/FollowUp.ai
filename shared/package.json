@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "echo 'no lint'",
+    "lint": "eslint --ext .js,.ts,.jsx,.tsx --no-error-on-unmatched-pattern . && prettier -c \"**/*.{js,ts,jsx,tsx,json,md}\" && flow check && stylelint \"**/*.css\" || true",
     "test": "echo 'no tests'"
   }
 }

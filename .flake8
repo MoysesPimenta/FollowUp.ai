@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203,W503
+select = C,E,F,W,B,B950,D
+exclude = .git,__pycache__,build,dist,node_modules
+# D is for pydocstyle via flake8-docstrings

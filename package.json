@@ -12,5 +12,10 @@
   "scripts": {
     "lint": "pnpm -r lint",
     "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "eslint-plugin-prettier": "^5.5.3",
+    "stylelint-config-standard": "^38.0.0"
   }
 }

@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -13,6 +13,11 @@ jobs:
         with:
           version: 8
       - run: pnpm install --frozen-lockfile
+      - run: pnpm add -g eslint prettier flow-bin stylelint
+      - run: python -m pip install --upgrade pip flake8 flake8-docstrings black mypy docformatter pydocstyle
+      - run: black --check .
+      - run: flake8 .
+      - run: mypy .
       - run: pnpm lint
 
   test:
