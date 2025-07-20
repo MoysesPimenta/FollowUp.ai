@@ -12,6 +12,11 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: pip install flake8 black mypy pydocstyle docformatter flake8-docstrings
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
@@ -22,5 +27,10 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: pip install flake8 black mypy pydocstyle docformatter flake8-docstrings
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
