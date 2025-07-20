@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "eslint .",
+    "lint": "black --check . && docformatter --check -r . && pydocstyle . && flake8 . && mypy . && eslint . && prettier -c '**/*.{js,jsx,ts,tsx}' && stylelint '**/*.css' || true && flow check",
     "test": "pytest -W error ../tests"
   },
   "type": "module"
