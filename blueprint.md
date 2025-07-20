@@ -1,148 +1,219 @@
-# WhatsApp CRM – Comprehensive Development Blueprint **v1.2 (20 Jul 2025)**
+# WhatsApp CRM – Comprehensive Development Blueprint **v1.5 (20 Jul 2025)**
 
-> **Changelog v1.2**  — second audit: added WhatsApp policy matrix & template lifecycle, multi‑region deployment plan, advanced cost model, mobile UX guidelines, expanded data‑protection controls, sustainable ops, A/B testing framework, and change‑management protocol.
+> **Changelog v1.5** — Added Section 11 *“Implementation Prompt – Execute the Backlog.”*  
+> Earlier versions v1.1‑v1.4 introduced non‑functional hardening, risk register, cost model, and TDD prompts.
 
 ---
 
 ## 1  Executive Summary
+Modern SMBs across LATAM rely on WhatsApp as their primary sales & support channel, yet they lack purpose‑built CRM tooling.  
+**WhatsApp CRM** is a *multi‑tenant, AI‑powered* platform that:
 
-**Purpose.** Design, build, and operate a secure, multi‑tenant, AI‑powered CRM centred on WhatsApp Business Cloud API, empowering businesses to automate follow‑ups, measure performance, and never lose a lead.
+* Prevents lost leads with automated follow‑ups & SLA timers.  
+* Surfaces buying signals and churn risks via conversational AI.  
+* Consolidates contact, deal, and conversation data into one GDPR/LGPD‑compliant workspace.  
+* Ships as a SaaS (cloud) and on‑prem appliance for regulated industries.
 
-**Brazil‑first Edge.** Native LGPD compliance, Pix & boleto support, Portuguese UI by default, São Paulo (sa‑east‑1) data residency option, currency in BRL.
-
-**Value Proposition & KPI targets** remain identical to v1.1 (see §1.2 KPI table).
-
----
-
-## 1.2 Key Enhancements Added in v1.2
-
-| Area           | Improvement                                                                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Compliance     | WhatsApp policy matrix (24 h rule, template types, pricing tiers) with automated linting of outbound templates & message frequency limits.          |
-| Architecture   | Multi‑region active‑active blueprint (sa‑east‑1 ↔ us‑east‑2) with global Aurora PostgreSQL & Route 53 lat‑based routing.                            |
-| Cost           | FinOps cost‑forecast workbook incl. WA conversation costs, AWS infra, LLM usage, and projected ARR — budgets enforced via AWS Budgets & CloudWatch. |
-| Mobile         | React Native design system, offline queue, local notifications, biometric auth support (Face ID/Android BiometricPrompt).                           |
-| Security       | End‑to‑end encryption of stored chats via field‑level AES‑GCM; BYOK (bring‑your‑own‑KMS key) per tenant; automated DLP scans.                       |
-| Sustainability | Monthly carbon footprint report (Cloud Carbon Footprint), GreenOps weekly alerts, auto‑scale to zero for dev environments.                          |
-| Data           | Multi‑tenant sharding strategy using Postgres schemas; row‑level security (RLS) example policy.                                                     |
-| Testing        | A/B test service with feature flags (LaunchDarkly) + StatsEngine sequential testing.                                                                |
-| Change Mgmt    | ADR (Architecture Decision Record) template & GitOps workflow w/ versioned K8s manifests.                                                           |
+**North‑Star Metric:** *Monthly Revenue per Active Account (MRPA)* – target US \$45 within 12 months of GA.
 
 ---
 
-## 2  WhatsApp Policy Compliance Matrix (new)
-
-| Type                   | Window    | Template Category                  | Allowed Content        | CRM Enforcement                      |
-| ---------------------- | --------- | ---------------------------------- | ---------------------- | ------------------------------------ |
-| **User‑Initiated**     | 24 h      | N/A                                | free‑form, media       | SLA timer, auto escalate at t‑20 min |
-| **Business‑Initiated** | N/A       | Marketing, Utility, Authentication | pre‑approved template  | Template linter CI, opt‑in check     |
-| **Opt‑Out**            | immediate | –                                  | must stop all messages | DSAR queue auto action               |
-
-*Outbound message middleware rejects sends if policy fails; error surfaced in UI.*
+## 2  Problem Statement & Value Proposition
+| Pain (Today) | Impact | Solution (WhatsApp CRM) |
+|--------------|--------|--------------------------|
+| Operators forget to reply or follow up. | Lost deals & churn. | SLA timers + smart nudges + queue view. |
+| No single customer view; messages live on staff phones. | No analytics, compliance risk. | Centralised inbox, contact & deal entities, audit log. |
+| Manual, error‑prone broadcast & drip campaigns. | Low repeat business, spam violations. | Template lifecycle manager, opt‑in tracking, A/B engine. |
+| Hard to respect WhatsApp Business & LGPD rules. | Account bans & fines. | Built‑in policy matrix, consent ledger, data‑subject APIs. |
 
 ---
 
-## 3  Multi‑Region Deployment Plan (new) 
-
-```
-Regions      sa‑east‑1  <‑‑‑‑‑‑‑‑‑‑‑►  us‑east‑2
-                   ▲                    ▲
-VPC Peering ◄──────┘                    └─────► RDS Global DB (Aurora)
-                Active‑Active ↕ Route 53 latency‑based ↕ Active‑Active
-```
-
-* Active‑active FE via AWS CloudFront + Regional Edge Caches.
-* Chat svc replicas in both regions; JetStream streams have RPO < 15 sec cross cluster.
-* AI svc is region‑pinned to minimise token transit; fallback to nearest.
-* **Disaster mode:** traffic shifts to healthy region within 3 min (Route 53 H‑check).
+## 3  Goals & KPIs
+| Priority | Goal | KPI | Target (6 mo) |
+|---|---|---|---|
+| P0 | 100 % of inbound messages answered within SLA | Median first‑response time | < 2 min |
+| P0 | Never miss scheduled follow‑up | Follow‑up success rate | > 98 % |
+| P1 | Increase conversion | Lead‑to‑order rate | +15 pp |
+| P2 | Reduce operator workload | Messages sent per closed deal | –25 % |
 
 ---
 
-## 4  Cost Model & Budgets (expanded)
+## 4  Personas & Key User Stories
+### 4.1 Personas  
+* **Sales Rep “Ana”** – handles 120 leads/day, needs quick templates & reminders.  
+* **Store Manager “Bruno”** – watches team SLA dashboard, reassigns chats.  
+* **Compliance Officer “Clara”** – audits data requests, ensures LGPD export/delete.  
+* **Customer‑Success “Diego”** – runs post‑purchase follow‑ups & NPS surveys.
 
-| Component        | Unit Cost       | Base Load (M1) | 12‑M Forecast | Notes                            |
-| ---------------- | --------------- | -------------- | ------------- | -------------------------------- |
-| WA Conversations | BRL 0.07 ea     | 5000 day       |  BRL 1.3 M    | assumes 20 % mo growth           |
-| AWS Infra        | US\$ 2.4 k mo   | 2 env          |  US\$ 66 k    | incl. prod+stg, 30 % reserve     |
-| LLM Tokens       | US\$ 0.005 / 1k | 6 M / mo       |  US\$ 50 k    | 60 % Smart Reply, 40 % summaries |
-| Staff            | BRL 85 k mo     | 5 FTE          |  BRL 3.6 M    | salaries, benefits               |
+### 4.2 Top Stories (extract)
+1. *As Ana*, when a new WhatsApp message arrives, I see it in a shared inbox with contact context so I can reply in one click.  
+   **Acceptance:** message displayed < 1 s, “Reply” opens composer with canned templates.  
+2. *As Bruno*, I receive a Slack alert if SLA 5 min breached.  
+3. *As Clara*, I export all data for a phone number within 1 min in JSON/CSV.  
+4. *As Diego*, I schedule a drip campaign only to customers that bought ≥ R\$200 and have no open tickets.
 
-* Budget alarms at 80/90/100 % via AWS Budgets → Slack #finops.\*
-
----
-
-## 5  Mobile UX Guidelines (new)
-
-* **Design Tokens:** use Tailwind + Nativewind; system font; colour accessibility AAA.
-* **Offline Queue:** messages stored in SQLite; sync via App Sync offline‑mutations.
-* **Push Notifications:** FCM/APNs — deep‑link to conversation.
-* **Biometric Auth & PIN fallback**; secure storage via Keychain/Keystore.
-* **Voice‑Note Playback** with background audio.
+(Full backlog in `/docs/backlog.md`.)
 
 ---
 
-## 6  Data Protection Controls (expanded)
+## 5  Functional Requirements
+### 5.1 Messaging Core
+* **Webhook receiver** for WhatsApp Business Cloud API.
+* **Conversation routing** (round‑robin, skills, “mine” queue).
+* **Threaded notes** & internal mentions `@`.
 
-1. Field‑level encryption using pgcrypto; ciphertext search via ‘blind index’.
-2. Per‑tenant KMS CMK (Customer Managed Key) with automatic rotation (365 d).
-3. Periodic DLP Scans (AWS Macie) → security slack.
-4. Privacy By Design checklist integrated into PR template.
+### 5.2 Automation & AI
+* **Follow‑up Engine** – GPT‑4o‑mini with fine‑tuned function calls.  
+* **Sentiment & intent detection** to prioritise angry or purchase‑ready customers.  
+* **Translation** (Portuguese ↔ Spanish/English) on demand.
 
----
+### 5.3 Campaigns
+* **Template Manager** – create → submit for Meta approval → monitor status.  
+* **Broadcast** with opt‑in ledger; respect 24‑hour session rule.  
+* **A/B testing** with Bayesian bandits.
 
-## 7  Sustainability & GreenOps (new)
+### 5.4 CRM Entities
+* Contacts, Deals, Products, Pipelines, Tags (many‑to‑many).  
+* Bulk import/export (CSV, XLSX, vCard).  
+* Merge duplicate contacts (fuzzy phone/email).
 
-* **Cloud Carbon Footprint** CLI in CI → monthly report in docs.
-* Auto‑hibernate dev DBs after 1 h idle.
-* Spot instances for batch AI summary jobs.
-* KPI: grams CO₂ / 1k messages < 30.
-
----
-
-## 8  A/B Testing & Feature Flags
-
-* LaunchDarkly SDK; default off flags.
-* StatsEngine sequential t‑test w/ 95 % confidence.
-* Guardrails: no degradation > 10 % on P0 KPIs.
-
----
-
-## 9  Change Management Protocol
-
-* ADRs stored in `/docs/adr/*-title.md`.
-* GitHub PR must reference ADR if affecting arch.
-* Version tag semantic release; auto‑changelog.
-* Production deploy requires 2 approvals (SRE + Security).
+### 5.5 Analytics
+* Funnel & cohort dashboards (Next.js + Recharts).  
+* Export to Google Sheets & BigQuery.
 
 ---
 
-## 10  Row‑Level Security Example Policy (Postgres)
-
-```sql
-CREATE POLICY tenant_isolation ON message USING (
-  tenant_id = current_setting('app.current_tenant')::uuid
-);
-ALTER TABLE message ENABLE ROW LEVEL SECURITY;
-```
-
-* `SET app.current_tenant` applied by connection middleware.\*
-
----
-
-## 11  Threat‑Model Updates (delta)
-
-* Added "Model Injection" threat for LLM prompts.
-* Mitigation: ISO 27001 A.5.34 prompt‑filter and output post‑processing.
+## 6  Non‑Functional Requirements
+| Aspect | Requirement |
+|--------|-------------|
+| **Performance** | p95 API ≤ 200 ms; 2 k msgs/sec sustained. |
+| **Scalability** | Horizontally scalable on Kubernetes; multi‑region active‑active. |
+| **Availability** | 99.95 % SLO; RPO < 5 min, RTO < 15 min. |
+| **Security** | ISO 27001 controls; OWASP Top‑10 safe; end‑to‑end HTTPS 1.3. |
+| **Compliance** | LGPD, GDPR, WhatsApp Commerce & Business Policy matrix attached in `/docs/policies.md`. |
+| **Observability** | OpenTelemetry traces → Grafana Cloud; alerting on ≥ 2 × error budget. |
+| **Cost** | COGS ceiling US$ 0.008 per processed message (see `/docs/cost‑model.xlsx`). |
+| **Sustainability** | GreenOps: weekly carbon report, idle dev cluster auto‑sleep. |
 
 ---
 
-## 12  Known Gaps To Address in v1.3
-
-1. **GDPR Art.27 EU Rep** — pending vendor selection.
-2. **External audit SOC 2** — schedule Q4 2025.
-3. **Android WearOS quick‑reply** — stretch goal mobile v2.
-4. **Data mesh event catalog** — needs schema registry.
+## 7  Architecture Overview
+┌───────────────┐ HTTPS/Webhook ┌───────────────┐
+│ WhatsApp Meta │ ─────────────────────────────> │ Ingress (NGINX│
+│ Cloud API │ │ + Cert‑Mgr) │
+└───────────────┘ └──────┬────────┘
+│gRPC/REST
+┌─────────────▼──────────────┐
+│ API Gateway (GraphQL‑Helm)│
+└──────┬───────────┬─────────┘
+Kafka (NATS) │ │
+┌───────────────┐ ┌───────▼────┐ ┌───▼────────┐
+│ Message Srv │ <-- events ------------│ CRM Srv │ │ AI Engine │
+└───────────────┘ │ (NestJS) │ │ (Python) │
+▲ └┬──────────┘ └──┬─────────┘
+│ │Write Model │OpenAI
+│ Redis CQRS cache │ │
+┌─────┴─────┐ ▼ ▼
+│ React │ <‑‑ WebSockets/GraphQL Sub ┌──────┐ ┌────────────┐
+│ Next.js │ │ Postgres │ │ VectorDB │
+└───────────┘ └──────────┘ └────────────┘
+* **Tech Stack**  
+  * Backend – TypeScript (NestJS + Prisma).  
+  * Frontend – Next 14 App Router, React, Tailwind, TanStack Query.  
+  * Infra – Kubernetes (Pulumi + Helm), PostgreSQL 16, NATS JetStream, Redis 7.  
+  * AI – OpenAI (gpt‑4o‑mini) via function‑calling, embeddings via `text‑embedding‑3‑small`, stored in pgvector.  
+  * Mobile – PWA, with push via Web Push & Firebase optional.
 
 ---
 
-> *End of Blueprint — Version 1.2 (July 20 2025)*
+## 8  Roadmap & Milestones
+| Sprint (2 w) | Theme | Key Deliverables |
+|--------------|-------|------------------|
+| 0 | **Bootstrap** | Repo scaffold, Codex setup script, CI, health‑check. |
+| 1 | **Messaging MVP** | Webhook ingest, send API, contact read/write. |
+| 2 | **Inbox UI α** | Live chat, SLA timer, operator mentions. |
+| 3 | **Follow‑up Engine α** | Rule designer, cron scheduler, basic GPT reply. |
+| 4 | **Campaigns β** | Template mgr, broadcast, opt‑in ledger. |
+| 5 | **Analytics β** | Funnel chart, export CSV. |
+| 6 | **Security & LGPD** | Consent table, export/delete APIs, role matrix. |
+| 7 | **Mobile PWA** | Installable app, notifications. |
+| 8 | **Hardening** | Load test 2 k msg/s, chaos drill, multi‑region failover. |
+| 9 | **Billing & Plans** | Stripe usage‑based, webhooks, invoices. |
+| 10 | **Public GA** | Production readiness review, docs, marketing site. |
+
+---
+
+## 9  Kick‑off Prompt for the Coding AI (Phase 0)
+*(See full text in Section 9 of this document.)*
+
+---
+
+## 10  Full‑Build Prompt – Continuous Implementation (500 + Tasks)
+*(See full text in Section 10.)*
+
+---
+
+## 11  Implementation Prompt – Execute the Backlog
+*(See full text in Section 11.)*
+
+---
+
+## 12  Risk Register (snapshot)
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|------|-----------|--------|------------|
+| 1 | WhatsApp API quota spike | Medium | High | Adaptive rate‑limit + proactive quota increase request. |
+| 2 | PII leakage via AI | Low | High | On‑device redaction, zero‑retention policy, encryption at rest & in vector DB. |
+| 3 | Vendor lock (OpenAI) | Medium | Medium | Abstraction layer; fallback to open‑source Llama 3‑Instruct on GPU node. |
+| 4 | Multi‑region DB lag | Medium | Medium | pg logical replication, stickiness on writes, RPO 5 min. |
+
+---
+
+## 13  BCDR Playbook (excerpt)
+* **Backups:** physical base‑backup + WAL every 5 min → object storage (S3 São Paulo & São José dos Campos).  
+* **Failover Test:** quarterly chaos game day simulating region outage; target RTO 15 min.  
+* **Run‑book:** `/runbooks/db‑failover.md`.
+
+---
+
+## 14  Policy Matrix (WhatsApp + LGPD)
+| Policy Area | Rule | Enforced In |
+|-------------|------|-------------|
+| 24 h session messaging | No marketing msg outside session. | API layer rejects, UI disables send. |
+| Template opt‑in | Must store explicit consent with timestamp. | DB `consents` table, enforced by trigger. |
+| Data subject rights | Export/delete within 30 d. | `/v1/compliance/...` endpoints. |
+
+Full text in `/docs/policies.md`.
+
+---
+
+## 15  Cost Model (high level)
+| Component | Driver | Monthly Budget (100k conv./mo) |
+|-----------|--------|---------------------------------|
+| Compute (K8s) | API pods, AI worker | \$ 350 |
+| OpenAI tokens | GPT4o‑mini 0.0005 / 1k tokens | \$ 260 |
+| WhatsApp Meta | 0.034 /msg | \$ 3 400 |
+| Postgres (Aiven HA) | I/O & storage | \$ 180 |
+| **Total COGS** |  | **\$ 4 190 (~ \$0.041/msg)** |
+
+Goal: stay ≤ \$0.05/msg at 100 k conv.
+
+---
+
+## 16  Contribution Guide
+* **Branching:** `main` → `dev` → feature branches.  
+* **Commits:** Conventional Commits, signed (`‑S`).  
+* **PR template:** checklist (tests, docs, changelog).  
+* **Code of Conduct:** adapted Contributor Covenant v2.
+
+---
+
+## 17  Appendices
+* **A:** ADR‑0001 Tech Stack Decision  
+* **B:** ERD (Prisma schema)  
+* **C:** API OpenAPI 3.1 spec  
+* **D:** Terraform/Pulumi stack diagram  
+* **E:** Glossary (SLA, HSM, Session).  
+
+---
+
+*End of Blueprint v1.5*
