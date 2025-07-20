@@ -1,0 +1,9 @@
+{
+  "name": "@followup/backend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "echo 'linting backend'",
+    "test": "echo 'testing backend'"
+  }
+}

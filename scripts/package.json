@@ -1,0 +1,9 @@
+{
+  "name": "@followup/scripts",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "echo 'linting scripts'",
+    "test": "echo 'testing scripts'"
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "extends": "../.devcontainer/devcontainer.json"
+}

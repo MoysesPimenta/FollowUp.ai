@@ -1,0 +1,5 @@
+{
+  "name": "FollowUp Workspace",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
+  "postCreateCommand": "pnpm install"
+}

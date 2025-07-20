@@ -1,0 +1,9 @@
+{
+  "name": "followup-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  }
+}
