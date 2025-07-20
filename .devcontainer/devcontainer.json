@@ -1,0 +1,4 @@
+{
+  "name": "followup",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu"
+}

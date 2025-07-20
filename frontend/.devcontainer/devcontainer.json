@@ -1,0 +1,4 @@
+{
+  "name": "followup-frontend",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu"
+}

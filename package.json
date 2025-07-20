@@ -1,0 +1,16 @@
+{
+  "name": "followup",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared",
+    "infra",
+    "scripts"
+  ],
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  }
+}
