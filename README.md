@@ -26,6 +26,16 @@ The repository is organised as a pnpm workspace. Packages are located in the fol
 - `infra` – infrastructure automation.
 - `scripts` – development utilities.
 
+## Running with Docker Compose
+
+Build and start both the API and UI containers:
+
+```bash
+docker compose up --build
+```
+
+The API will be available on `http://localhost:8000` and the UI on `http://localhost:3000`.
+
 ## Linting and Testing
 
 When linting and test suites are available, run them across the workspace with:
