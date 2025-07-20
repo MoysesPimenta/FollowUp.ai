@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "echo 'no lint'",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 --no-error-on-unmatched-pattern && prettier -c \"**/*.{js,jsx,ts,tsx,json,css,md}\" --no-error-on-unmatched-pattern && flow check && stylelint \"**/*.css\" --allow-empty-input || true",
     "test": "echo 'no tests'"
   }
 }
