@@ -1,0 +1,18 @@
+[tool.black]
+line-length = 88
+target-version = ['py310']
+skip-string-normalization = true
+
+[tool.mypy]
+python_version = '3.10'
+ignore_missing_imports = true
+strict = true
+
+[tool.docformatter]
+wrap-summaries = 79
+wrap-descriptions = 79
+recursive = true
+
+[tool.pydocstyle]
+convention = "google"
+add-ignore = ["D104"]

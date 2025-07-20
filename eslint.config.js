@@ -1,0 +1,14 @@
+export default {
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+  },
+  extends: ["eslint:recommended", "plugin:flowtype/recommended", "prettier"],
+  plugins: ["flowtype"],
+  parserOptions: {
+    ecmaVersion: 12,
+    sourceType: "module",
+  },
+  rules: {},
+};

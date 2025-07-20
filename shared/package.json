@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "echo 'no lint'",
+    "lint": "npx eslint . --ext js,jsx,ts,tsx --no-error-on-unmatched-pattern && npx prettier -c . && npx flow check || true && npx stylelint \"**/*.css\" || true",
     "test": "echo 'no tests'"
   }
 }
