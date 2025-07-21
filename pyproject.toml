@@ -5,3 +5,7 @@ line-length = 88
 python_version = "3.12"
 strict = true
 
+[tool.pytest.ini_options]
+addopts = "-W error"
+testpaths = ["tests"]
+
