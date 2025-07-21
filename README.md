@@ -61,3 +61,4 @@ The generated site can be found in `docs/source/_build/html`.
 ## Contributing
 
 Refer to [`docs/backlog.md`](./docs/backlog.md) for planned work. Please mention the backlog item you are addressing when opening a pull request.
+For an overview of milestone priorities, see [`docs/milestones.md`](./docs/milestones.md).
