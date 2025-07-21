@@ -23,7 +23,7 @@ jobs:
           npm install -g pnpm
           pnpm install
           python -m pip install --upgrade pip
-          pip install sphinx
+          pip install -r backend/requirements.txt sphinx
       - name: Run tests
         run: pnpm test
       - name: Build docs

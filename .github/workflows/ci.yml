@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install --upgrade pip
-      - run: pip install flake8 black mypy pydocstyle docformatter flake8-docstrings
+      - run: pip install -r backend/requirements.txt flake8 black mypy pydocstyle docformatter flake8-docstrings
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
@@ -31,6 +31,6 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install --upgrade pip
-      - run: pip install flake8 black mypy pydocstyle docformatter flake8-docstrings
+      - run: pip install -r backend/requirements.txt flake8 black mypy pydocstyle docformatter flake8-docstrings
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
