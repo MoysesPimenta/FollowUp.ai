@@ -1,13 +1,8 @@
 """Tests for the Message dataclass."""
 
-import sys
-from pathlib import Path
 import uuid
 from datetime import datetime
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
-from backend.messaging_core.models import Message  # noqa: E402
+from backend.messaging_core.models import Message
 
 
 def test_message_entity_dataclass() -> None:

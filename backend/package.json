@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "lint": "black --check . && docformatter --check -r . && pydocstyle . && flake8 . && mypy . && eslint . && prettier -c '**/*.{js,jsx,ts,tsx}' && stylelint '**/*.css' && flow check",
-    "test": "pytest -W error ../tests"
+    "test": "PYTHONPATH=.. pytest -W error ../tests"
   },
   "type": "module"
 }
