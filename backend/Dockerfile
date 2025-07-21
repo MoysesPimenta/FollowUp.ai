@@ -2,7 +2,8 @@
 FROM python:3.12-slim
 
 # Install application dependencies
-RUN pip install --no-cache-dir fastapi uvicorn
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy source code
 WORKDIR /app
